@@ -10,9 +10,9 @@ class Minesweeper
         @mines << bomb_spot
       end
     end
-
     @flagged_spots = []
     @fringe_values = create_fringe
+    @checked_spots = []
     @row = row
     @col = col
 
@@ -48,12 +48,44 @@ class Minesweeper
     end
   end
 
-
   def in_bounds?(position)
     x = position[0]
     y = position[1]
     0 <= x && x <= @row && 0 <= y && y <= @col
   end
+
+  def print_board
+    i = 0
+    j = 0
+    output_matrix = []
+    matrix_sizer(output_matrix)
+    while i < @row
+      output_matrix << []
+      while j < @col
+        current_index = [i,j]
+        if @checked_spots.include?[i,j]
+          if @fringe_values.include?[i,j]
+            output_matrix[i] << @fringe_value[i,j]
+          else
+            output_matrix[i] << "_"
+          end
+        elsif
+            @flagged_spots.include?[i,j]
+            output_matrix[i] << "F"
+        else
+          output_matrix[i] << "*"
+        end
+        j += 1
+      end
+      i += 1
+    end
+    output_matrix
+  end
+
+  def clicked_spot
+    #when we add a blank spot to the @checked_array, make sure to also add all non-fringe and fringe neighbors to that array too
+    #what does clicking directly on a frige do? does it open any neighbors?
+end
 
 
   def play
