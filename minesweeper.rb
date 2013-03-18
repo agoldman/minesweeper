@@ -66,11 +66,12 @@ class Minesweeper
         if @checked_spots.include?[i,j]
           if @fringe_values.include?[i,j]
             output_matrix[i] << @fringe_value[i,j]
+          elsif @mines.include?([i,j])
+            output_matrix[i] << "B"
           else
             output_matrix[i] << "_"
           end
-        elsif
-            @flagged_spots.include?[i,j]
+        elsif @flagged_spots.include?[i,j]
             output_matrix[i] << "F"
         else
           output_matrix[i] << "*"
@@ -82,13 +83,57 @@ class Minesweeper
     output_matrix
   end
 
-  def clicked_spot
-    #when we add a blank spot to the @checked_array, make sure to also add all non-fringe and fringe neighbors to that array too
-    #what does clicking directly on a frige do? does it open any neighbors?
-end
-
 
   def play
+    gameover = false
+    until gameover
+      puts print_board
+      puts "Please enter the position you'd like to play:"
+      puts "Example 0 7 represents Row 0 Column 7"
+      input_array = gets.chomp.split(' ')
+      until valid?(input_array)
+        puts "Invalid Input"
+        puts "Enter another spot"
+        input_array = gets.chomp.split(' ')
+      end
+      place_move(input_array)
+      gameover = @mines.include?(move) || won?(input_array) # user has selected a bomb spot
+    end
+    puts print_board
+    if won?(input_array)
+      puts "You Won!"
+    else "BOMB!"
+  end
+
+  def place_move
+    #when we add a blank spot to the @checked_array, make sure to also add all non-fringe and fringe neighbors to that array too
+    #what does clicking directly on a frige do? does it open any neighbors?
+  end
+
+
+  def won?(move)
+    won = true
+    if @flagged_spots.count < 10
+      won = false
+    else @flagged_spots.each do |element|
+        unless @mines.include?(element)
+          won = false
+          break
+        end
+      end
+    end
+
+    won
+   end
+
+
+
+  end
+
+  def valid?(position)
+    in_bounds?(position) and
+    !@checked_spots.include?(position) and
+    !@flagged_spots.include?(position)
   end
 
 
