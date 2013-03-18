@@ -89,6 +89,8 @@ class Minesweeper
     until gameover
       puts print_board
       puts "Please enter the position you'd like to play:"
+      puts "Type 'r' to reveal a position or 'f' to flag a position:"
+      input_type = gets.chomp.downcase
       puts "Example 0 7 represents Row 0 Column 7"
       input_array = gets.chomp.split(' ')
       until valid?(input_array)
@@ -105,9 +107,34 @@ class Minesweeper
     else "BOMB!"
   end
 
-  def place_move
+  def place_move(input_type, input_array)
     #when we add a blank spot to the @checked_array, make sure to also add all non-fringe and fringe neighbors to that array too
     #what does clicking directly on a frige do? does it open any neighbors?
+    if input_type == 'f'
+      @flagged_spots << input_array
+    end
+    if input_type == 'r'
+      if !in_bounds?(input_array)
+      elsif @fringe_spots.includes?(input_array)
+        @checked_spots << input_array
+      else
+
+        neighbours = [[spot[0] - 1, spot[1]],
+                  [spot[0] - 1, spot[1] + 1],
+                  [spot[0], spot[1] + 1],
+                  [spot[0] + 1, spot[1] + 1],
+                  [spot[0] + 1, spot[1]],
+                  [spot[0] + 1, spot[1] - 1],
+                  [spot[0], spot[1] - 1],
+                  [spot[0] - 1, spot[1] - 1]]
+
+
+        neighbours.each {|spot| place_move(input_type, spot)}
+        end
+    end
+
+
+
   end
 
 
