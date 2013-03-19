@@ -45,6 +45,7 @@ class Minesweeper
                   [spot[0] + 1, spot[1] - 1],
                   [spot[0], spot[1] - 1],
                   [spot[0] - 1, spot[1] - 1]]
+                  #mshopsin you could have achieve this with loops in fewer lines
                   #filter for which of those spots are inbounds
       inbounds_fringes = temp_fringes.select { |current_spot| in_bounds?(current_spot) }
       add_fringes(inbounds_fringes)
@@ -66,6 +67,7 @@ class Minesweeper
   def in_bounds?(position)
     x = position[0]
     y = position[1]
+    #mshopsin x,y = position[0], position[1]
     0 <= x && x <= @row && 0 <= y && y <= @col
   end
 
@@ -177,7 +179,7 @@ class Minesweeper
                   [input_array[0] + 1, input_array[1] - 1],
                   [input_array[0], input_array[1] - 1],
                   [input_array[0] - 1, input_array[1] - 1]]
-
+        #mshopsin once again loops would have been easier to read
         neighbours.each do |spot|
           @checked_spots << input_array
           @already_checked_neighbors << input_array
