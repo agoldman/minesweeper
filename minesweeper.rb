@@ -1,3 +1,4 @@
+require 'yaml'
 class Minesweeper
 
   attr_accessor :mines, :flagged_spots, :fringe_values, :checked_spots, :row, :col
@@ -16,6 +17,7 @@ class Minesweeper
     @fringe_values = Hash.new
     create_fringe
     @checked_spots = []
+    @already_checked_neighbors = []
 
   end
 
@@ -59,14 +61,14 @@ class Minesweeper
     i = 0
     output_matrix = []
     matrix_maker(output_matrix)
-    while i < @row
+    while i <= @row
       #output_matrix << []
       j = 0
-      while j < @col
+      while j <= @col
         current_index = [i,j]
         if @checked_spots.include?([i,j])
           if @fringe_values.include?([i,j])
-            output_matrix[i] << @fringe_values[[i,j]]
+            output_matrix[i] << @fringe_values[[i,j]].to_s
           elsif @mines.include?([i,j])
             output_matrix[i] << "B"
           else
@@ -86,19 +88,24 @@ class Minesweeper
   end
 
   def matrix_maker(output_matrix)
-    @row.times { |element| output_matrix << []}
+    (@row+1).times { |element| output_matrix << []}
  end
 
 
   def play
     p "#{@mines} bombs list"
+    p "#{@fringe_values} fringes"
     gameover = false
+    input_type = ""
     until gameover
       print_matrix = print_board
       print_matrix.each {|row| puts "#{row} \n"}
       puts "Please enter the position you'd like to play:"
-      puts "Type 'r' to reveal a position or 'f' to flag a position:"
+      puts "Type 'r' to reveal a position or 'f' to flag a position or q or s to quit or save:"
       input_type = gets.chomp.downcase
+      if input_type == "q"|| input_type == "s"
+        break
+      end
       puts "Example 0 7 represents Row 0 Column 7"
       temp_input_array = gets.chomp.split(' ')
       input_array = [temp_input_array[0].to_i, temp_input_array[1].to_i]
@@ -107,28 +114,39 @@ class Minesweeper
         puts "Enter another spot"
         input_array = gets.chomp.split(' ')
       end
-      place_move(input_type, input_array)
-      p "#{@checked_spots} checked spots after move"
+      if @mines.include?(input_array)
+        @checked_spots << input_array
+      else
+        place_move(input_type, input_array)
+      end
       gameover = (input_type != "f" && @mines.include?(input_array)) || won?(input_array) # user has selected a bomb spot
     end
-    p "#{@checked_spots} checked spots"
-    print_matrix = print_board
-    print_matrix.each {|row| puts "#{row} \n"}
-    if won?(input_array)
-      puts "You Won!"
-    else "BOMB!"
+    if input_type == "q"
+    elsif input_type == "s"
+      puts "Please input filename"
+      filename = gets.chomp
+      saved_game = self.to_yaml
+      f = File.open(filename, "w")
+      f.puts saved_game
+      f.close
+    else
+      print_matrix = print_board
+      print_matrix.each {|row| puts "#{row} \n"}
+      if won?(input_array)
+        puts "You Won!"
+      else "BOMB!"
+      end
     end
   end
 
   def place_move(input_type, input_array)
-    #when we add a blank spot to the @checked_array, make sure to also add all non-fringe and fringe neighbors to that array too
-    #what does clicking directly on a frige do? does it open any neighbors?
     if input_type == 'f'
       @flagged_spots << input_array
     end
     if input_type == 'r'
-      if !in_bounds?(input_array)
-      elsif @fringe_values.has_key?(input_array) || @mines.include?(input_array)
+      if !in_bounds?(input_array) || @already_checked_neighbors.include?(input_array)
+      elsif @fringe_values.has_key?(input_array)
+        @already_checked_neighbors << input_array
         @checked_spots << input_array
       else
         neighbours = [[input_array[0] - 1, input_array[1]],
@@ -140,9 +158,14 @@ class Minesweeper
                   [input_array[0], input_array[1] - 1],
                   [input_array[0] - 1, input_array[1] - 1]]
 
-        neighbours.each {|spot| place_move(input_type, spot)}
+        neighbours.each do |spot|
+          @checked_spots << input_array
+          @already_checked_neighbors << input_array
+           place_move(input_type, spot)
         end
+      end
     end
+
   end
 
 
@@ -167,3 +190,6 @@ class Minesweeper
     !@flagged_spots.include?(position)
   end
 end
+
+new_game = Minesweeper.new
+new_game.play
