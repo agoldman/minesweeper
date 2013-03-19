@@ -1,13 +1,14 @@
 require 'yaml'
 class Minesweeper
 
-  attr_accessor :mines, :flagged_spots, :fringe_values, :checked_spots, :row, :col
+  attr_accessor :mines, :flagged_spots, :fringe_values, :checked_spots, :row, :col, :mine_num
 
-  def initialize(row = 9, col = 9)
+  def initialize(row = 9, col = 9, mine_num = 10)
     @row = row
     @col = col
     @mines = []
-    until @mines.count == 10
+    @mine_num = mine_num
+    until @mines.count == mine_num
       bomb_spot = [rand(row+1), rand(col+1)]
       unless @mines.include?(bomb_spot)
         @mines << bomb_spot
@@ -19,6 +20,17 @@ class Minesweeper
     @checked_spots = []
     @already_checked_neighbors = []
 
+  end
+
+  def set_up
+    until @mines.count == mine_num
+      bomb_spot = [rand(row+1), rand(col+1)]
+      unless @mines.include?(bomb_spot)
+        @mines << bomb_spot
+      end
+    end
+    @fringe_values = Hash.new
+    create_fringe
   end
 
 
@@ -95,6 +107,13 @@ class Minesweeper
   def play
     p "#{@mines} bombs list"
     p "#{@fringe_values} fringes"
+    puts "Please input number of rows to play."
+    @row = gets.chomp.to_i
+    puts "Please input number of columns to play."
+    @col = gets.chomp.to_i
+    puts "Please input number of bombs to search"
+    @mine_num = gets.chomp.to_i
+    set_up #build @mines and @fringe arrays
     gameover = false
     input_type = ""
     until gameover
@@ -134,7 +153,8 @@ class Minesweeper
       print_matrix.each {|row| puts "#{row} \n"}
       if won?(input_array)
         puts "You Won!"
-      else "BOMB!"
+      else
+        puts "BOMB!"
       end
     end
   end
