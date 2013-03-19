@@ -126,7 +126,7 @@ class Minesweeper
       puts "Please input filename"
       filename = gets.chomp
       saved_game = self.to_yaml
-      f = File.open(filename, "w")
+      f = File.open(filename + ".yaml", "w")
       f.puts saved_game
       f.close
     else
@@ -191,5 +191,12 @@ class Minesweeper
   end
 end
 
-new_game = Minesweeper.new
-new_game.play
+m = nil
+if ARGV.length > 0
+  m = YAML.load_file(ARGV[0])
+  ARGV.pop
+else
+  m = Minesweeper.new
+end
+
+m.play
